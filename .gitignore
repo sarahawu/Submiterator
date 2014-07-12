@@ -1,0 +1,6 @@
+*.tsv
+*.results
+*.input
+*.properties
+*.success
+*.question
