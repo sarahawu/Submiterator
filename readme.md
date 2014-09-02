@@ -40,3 +40,34 @@ For example:
     Retrieve Data:
         sh getresults.sh example
         python reformat.py example.results example
+
+##  How to make this even cooler
+
+N.B. This will only work on unix.
+
+If you want, you can make `submiterator`, `posthit`, `getresults`, and `reformat` system-wide commands, so you can just type (for example):
+
+	submiterator example.config
+	posthit example
+	getresults example
+	reformat example
+
+To do this, save the Submiterator repo somewhere where it won't move, copy-paste and run the following command:
+
+	chmod u+x submiterator.py posthit.sh getresults.sh reformat.py
+
+Then make a directory called "bin" in your home folder and make sym-links to the Submiterator files:
+
+	cd ~
+	mkdir bin
+	cd bin
+	ln -s [PATH_TO_SUBMITERATOR_DIRECTORY]/submiterator.py submiterator
+	ln -s [PATH_TO_SUBMITERATOR_DIRECTORY]/posthit.sh posthit
+	ln -s [PATH_TO_SUBMITERATOR_DIRECTORY]/getresults.sh getresults
+	ln -s [PATH_TO_SUBMITERATOR_DIRECTORY]/reformat.py reformat
+
+Then open up or create the file `.bash_profile` or `.bashrc` in your home directory and add the following line:
+
+	PATH=$PATH:~/bin
+
+Then once you open up a new terminal, you should be able to use the submiterator commands as above.
