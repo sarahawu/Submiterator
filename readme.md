@@ -23,17 +23,15 @@ To post the HIT, first setup the config file.
 
 Then run the following commands in the terminal (from the top of the why directory):
 
-    python submiterator.py [PATH_TO_CONFIG_FILE] [OUTPUT_DIRECTORY*]
-    sh posthit.sh [PATH_TO_CONFIG_FILE] [OUTPUT_DIRECTORY*]
-
-The [OUTPUT_DIRECTORY*] is the directory in which to save files that submiterator makes. This argument is optional; by default, files will be saved to the current directory.
+    python submiterator.py [PATH_TO_CONFIG_FILE]
+    sh posthit.sh [NAMEOFEXPERIMENTFILES]
 
 And then when you want to get the results:
 
-    sh getresults.sh [PATH_TO_CONFIG_FILE] [OUTPUT_DIRECTORY*]
-    python scripts/_shared/mturk/reformat.py [NAME_OF_RESULTS_FILE] [LABEL_FOR_OUTPUT_FILES*]
+    sh getresults.sh [NAMEOFEXPERIMENTFILES]
+    python scripts/_shared/mturk/reformat.py [PATH_TO_RESULTS_FILE]
 
-The [LABEL_FOR_OUTPUT_FILES*] variable is options and will, by default, be the same as the results file.
+This will create a bunch of .tsv files with data from your experiment.
 
 For example:
     Post Hit:
