@@ -3,6 +3,7 @@
 import sys
 import csv
 import json
+import re
 
 def main():
 
@@ -19,6 +20,9 @@ def main():
       mturk_tag = mturk_data_file[:-8]
 
   output_data_file_label = mturk_tag
+
+  def clean_text(text):
+    return text
 
   def write_2_by_2(data, filename, sep="\t"):
     w = open(filename, "w")
@@ -51,7 +55,7 @@ def main():
             elem = row[i]
             label = header_labels[i]
             if label == "Answer." + data_type:
-              if label == "Answer.trials" or label == "Answer.check_trials":
+              if label == "Answer.trials" or label == "Answer.catch_trials":
                 this_is_hacky = "{\"this_is_hacky\":" + elem + "}"
                 trials = json.loads(this_is_hacky)["this_is_hacky"]
                 for trial in trials:
@@ -87,7 +91,7 @@ def main():
             elem = row[i]
             label = header_labels[i]
             if label == "Answer." + data_type:
-              if label == "Answer.trials" or label == "Answer.check_trials":
+              if label == "Answer.trials" or label == "Answer.catch_trials":
                 this_is_hacky = "{\"this_is_hacky\":" + elem + "}"
                 trials = json.loads(this_is_hacky)["this_is_hacky"]
                 for trial in trials:
@@ -135,7 +139,7 @@ def main():
               output_row.append(subject_level_data[key])
             output_rows.append(output_row)
     write_2_by_2(output_rows, output_data_file_label + "-" + data_type + ".tsv")
-    return output_rows
+    return [[clean_text(elem) for elem in row] for row in output_rows]
 
 
   # trial_columns = get_column_labels("trial")
@@ -145,7 +149,7 @@ def main():
 
   def make_full_tsv():
     trials = make_tsv("trials")
-    #check_trails = make_tsv("check_trials")
+    catch_trials = make_tsv("catch_trials")
     subject_information = make_tsv("subject_information")
     system = make_tsv("system")
     mturk = make_tsv("mturk")
@@ -155,14 +159,17 @@ def main():
     workerids = [row[0] for row in mturk][1:]
     for workerid in workerids:
       small_trials = [row for row in trials if row[0] == workerid] #has workerid
-      #small_trials = [row for row in trials if row[0] == workerid]
+      small_catch_trials = [row for row in catch_trials if row[0] == workerid] #has workerid
       small_subject_information = [row[1:] for row in subject_information if row[0] == workerid][0]
       small_system = [row[1:] for row in system if row[0] == workerid][0]
       small_mturk = [row[1:] for row in mturk if row[0] == workerid][0]
       ntrials = len(small_trials)
-      #print small_trials
       if ntrials > 0:
         for trial in small_trials:
+          big_row = trial + small_subject_information + small_system + small_mturk
+          big_rows.append(big_row)
+      if len(small_catch_trials) > 0:
+        for trial in small_catch_trials:
           big_row = trial + small_subject_information + small_system + small_mturk
           big_rows.append(big_row)
     write_2_by_2(big_rows, output_data_file_label + ".tsv")
