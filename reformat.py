@@ -13,12 +13,7 @@ def main():
     print "ERROR: please include the name of the results file"
     return False
 
-  experiment_folder = sys.argv[1]
-  if len(sys.argv) > 2:
-      mturk_tag = sys.argv[2]
-  else:
-      mturk_tag = mturk_data_file[:-8]
-
+  mturk_tag = mturk_data_file[:-8]
   output_data_file_label = mturk_tag
 
   def clean_text(text):
@@ -29,7 +24,10 @@ def main():
     w.write("\n".join(map(lambda x: sep.join(x), data)))
     w.close()
 
-  workers = {}
+  if len(sys.argv) > 2:
+    workers = json.loads(re.sub("'", '"', re.sub(" u'", " '", sys.argv[2])))
+  else:
+    workers = {}
   def symb(workerid):
     if workerid in workers:
       return workers[workerid]
@@ -166,10 +164,6 @@ def main():
       ntrials = len(small_trials)
       if ntrials > 0:
         for trial in small_trials:
-          big_row = trial + small_subject_information + small_system + small_mturk
-          big_rows.append(big_row)
-      if len(small_catch_trials) > 0:
-        for trial in small_catch_trials:
           big_row = trial + small_subject_information + small_system + small_mturk
           big_rows.append(big_row)
     write_2_by_2(big_rows, output_data_file_label + ".tsv")
