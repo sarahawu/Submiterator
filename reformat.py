@@ -50,7 +50,7 @@ def main():
             return [x for x in header_labels if (not x in ["Answer.trials", "Answer.subject_information", "Answer.check_trials", "Answer.system"])]
         else:
           for i in range(len(row)):
-            elem = row[i]
+            elem = re.sub("'", "", row[i])
             label = header_labels[i]
             if label == "Answer." + data_type:
               if label == "Answer.trials" or label == "Answer.catch_trials":
@@ -86,7 +86,7 @@ def main():
           for key in new_column_labels:
             trial_level_data[key] = []
           for i in range(len(row)):
-            elem = row[i]
+            elem = re.sub("'", "&quotechar", row[i])
             label = header_labels[i]
             if label == "Answer." + data_type:
               if label == "Answer.trials" or label == "Answer.catch_trials":

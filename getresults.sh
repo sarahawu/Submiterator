@@ -14,6 +14,7 @@ then
 	fi
 	label=$HERE/$DIRECTORY/$NAME_OF_EXPERIMENT_FILES
 	./getResults.sh -successfile $label.success -outputfile $label.results
+	anonymize $label.results
 else
 	echo "ERROR: please include name of experiment files"
 fi

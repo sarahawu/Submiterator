@@ -4,3 +4,5 @@
 *.properties
 *.success
 *.question
+*.RData
+*.Rhistory
