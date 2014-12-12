@@ -147,9 +147,9 @@ def prepare(nameofexperimentfiles, output_dir=""):
 
 def reformat(mturk_data_file, workers={}):
 
-  workerids_for_justification = []
-  dates_for_justification = []
-  prices_for_justification = []
+  workerids_for_invoice = []
+  dates_for_invoice = []
+  prices_for_invoice = []
 
   mturk_tag = mturk_data_file[:-8]
   output_data_file_label = mturk_tag
@@ -245,14 +245,17 @@ def reformat(mturk_data_file, workers={}):
                   else:
                     subject_level_data[key] = "NA"
             elif label == "workerid":
-              workerids_for_justification.append(elem)
+              if data_type == "subject_information":
+                workerids_for_invoice.append(elem)
               elem = symb(elem)
               subject_level_data["workerid"] = elem
             else:
               if label == "reward":
-                prices_for_justification.append(float(elem[1:]))
+                if data_type == "subject_information":
+                  prices_for_invoice.append(float(elem[1:]))
               elif label == "assignmentsubmittime":
-                dates_for_justification.append(elem)
+                if data_type == "subject_information":
+                  dates_for_invoice.append(elem)
               subject_level_data[label] = str(elem)
           if len(trial_level_data.keys()) > 0:
             ntrials = len(trial_level_data[trial_level_data.keys()[0]])
@@ -314,12 +317,12 @@ def reformat(mturk_data_file, workers={}):
   print workers
 
   rows = [["date", "workerid", "amount"]]
-  for i in range(len(workerids_for_justification)):
-    rows.append([dates_for_justification[i], workerids_for_justification[i], str(prices_for_justification[i])])
-  rows.append(["", "total paid to workers:", str(sum(prices_for_justification))])
-  rows.append(["", "10% paid to Amazon:", str(0.1*sum(prices_for_justification))])
-  rows.append(["", "total:", str(1.1*sum(prices_for_justification))])
-  write_2_by_2(rows, output_data_file_label + "_justification.tsv")
+  for i in range(len(workerids_for_invoice)):
+    rows.append([dates_for_invoice[i], workerids_for_invoice[i], str(prices_for_invoice[i])])
+  rows.append(["", "total paid to workers:", str(sum(prices_for_invoice))])
+  rows.append(["", "10% paid to Amazon:", str(0.1*sum(prices_for_invoice))])
+  rows.append(["", "total:", str(1.1*sum(prices_for_invoice))])
+  write_2_by_2(rows, output_data_file_label + "_invoice.tsv")
 
 def anonymize(original_data_filename):
     workers = {}
