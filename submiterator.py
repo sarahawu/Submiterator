@@ -322,7 +322,7 @@ def reformat(mturk_data_file, workers={}):
   rows.append(["", "total paid to workers:", str(sum(prices_for_invoice))])
   rows.append(["", "10% paid to Amazon:", str(0.1*sum(prices_for_invoice))])
   rows.append(["", "total:", str(1.1*sum(prices_for_invoice))])
-  write_2_by_2(rows, output_data_file_label + "_invoice.tsv")
+  write_2_by_2(rows, output_data_file_label + "_invoice.csv", sep=",")
 
 def anonymize(original_data_filename):
     workers = {}
