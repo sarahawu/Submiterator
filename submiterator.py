@@ -114,10 +114,12 @@ def main():
         elif subcommand == "getresults":
             getresults(label)
             anonymize(label + ".results")
+            make_invoice(label)
         elif subcommand == "reformat":
             try:
                 try:
                     reformat(label + ".results")
+                    make_invoice(label)
                 except IOError:
                     reformat(label + "_anonymized.results")
             except IOError:
@@ -213,14 +215,57 @@ def prepare(nameofexperimentfiles, output_dir=""):
         num = num + 1
     input.close()
 
-def reformat(mturk_data_file, workers={}):
+def make_invoice(output_file_label):
+
+  mturk_data_file = output_file_label + ".results"
+
+  def clean_text(text):
+    return text
+
+  def write_2_by_2(data, filename):
+    with open(filename, 'wb') as csvfile:
+      w = UnicodeWriter(csvfile)
+      w.writerows(data)
+      # w = open(filename, "w")
+      # w.write("\n".join(map(lambda x: sep.join(x), data)))
+      # w.close()
 
   workerids_for_invoice = []
   dates_for_invoice = []
   prices_for_invoice = []
 
+  with open(mturk_data_file, 'rb') as csvfile:
+    header_labels = []
+    header = True
+    mturk_reader = UnicodeReader(csvfile, delimiter='\t', quotechar='"', encoding="utf-8")
+    for row in mturk_reader:
+      if header:
+        header = False
+        header_labels = row
+      else:
+        for i in range(len(row)):
+          elem = re.sub("'", "&quotechar", row[i])
+          label = header_labels[i]
+          if label == "workerid":
+            workerids_for_invoice.append(elem)
+          elif label == "reward":
+            prices_for_invoice.append(float(elem[1:]))
+          elif label == "assignmentsubmittime":
+            dates_for_invoice.append(elem)
+
+  rows = [["date", "workerid", "amount"]]
+  for i in range(len(workerids_for_invoice)):
+    rows.append([dates_for_invoice[i], workerids_for_invoice[i], submiterator_stringify(prices_for_invoice[i])])
+  rows.append(["", "total paid to workers:", "=SUM(c2:c" + submiterator_stringify(len(workerids_for_invoice) + 1) + ")"])
+  rows.append(["", "10% paid to Amazon:", "=.1*c" + submiterator_stringify(len(workerids_for_invoice) + 2)])
+  rows.append(["", "total:", "=SUM(c" + submiterator_stringify(len(workerids_for_invoice) + 2) + ":c" + submiterator_stringify(len(workerids_for_invoice) + 3)])
+  write_2_by_2(rows, output_file_label + "_invoice.csv")
+
+def reformat(mturk_data_file, workers={}):
+
   mturk_tag = mturk_data_file[:-8]
   output_data_file_label = mturk_tag
+
 
   def clean_text(text):
     return text
@@ -316,17 +361,17 @@ def reformat(mturk_data_file, workers={}):
                   else:
                     subject_level_data[key] = "NA"
             elif label == "workerid":
-              if data_type == "subject_information":
-                workerids_for_invoice.append(elem)
+              # if data_type == "subject_information":
+              #   workerids_for_invoice.append(elem)
               elem = symb(elem)
               subject_level_data["workerid"] = elem
             else:
-              if label == "reward":
-                if data_type == "subject_information":
-                  prices_for_invoice.append(float(elem[1:]))
-              elif label == "assignmentsubmittime":
-                if data_type == "subject_information":
-                  dates_for_invoice.append(elem)
+              # if label == "reward":
+              #   if data_type == "subject_information":
+              #     prices_for_invoice.append(float(elem[1:]))
+              # elif label == "assignmentsubmittime":
+              #   if data_type == "subject_information":
+              #     dates_for_invoice.append(elem)
               subject_level_data[label] = submiterator_stringify(elem)
           if len(trial_level_data.keys()) > 0:
             ntrials = len(trial_level_data[trial_level_data.keys()[0]])
@@ -386,14 +431,6 @@ def reformat(mturk_data_file, workers={}):
   make_full_tsv()
 
   print workers
-
-  rows = [["date", "workerid", "amount"]]
-  for i in range(len(workerids_for_invoice)):
-    rows.append([dates_for_invoice[i], workerids_for_invoice[i], submiterator_stringify(prices_for_invoice[i])])
-  rows.append(["", "total paid to workers:", "=SUM(c2:c" + submiterator_stringify(len(workerids_for_invoice) + 1) + ")"])
-  rows.append(["", "10% paid to Amazon:", "=.1*c" + submiterator_stringify(len(workerids_for_invoice) + 2)])
-  rows.append(["", "total:", "=SUM(c" + submiterator_stringify(len(workerids_for_invoice) + 2) + ":c" + submiterator_stringify(len(workerids_for_invoice) + 3)])
-  write_2_by_2(rows, output_data_file_label + "_invoice.csv")
 
 def anonymize(original_data_filename):
     workers = {}
