@@ -1,6 +1,74 @@
 #!/usr/bin/env python
 
-import os, json, re, csv, argparse
+import csv, codecs, cStringIO
+import os, json, re, argparse
+
+encoding = "utf-8"
+
+class UTF8Recoder:
+    """
+    Iterator that reads an encoded stream and reencodes the input to UTF-8
+    """
+    def __init__(self, f, encoding):
+        self.reader = codecs.getreader(encoding)(f)
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        return self.reader.next().encode("utf-8")
+
+class UnicodeReader:
+    """
+    A CSV reader which will iterate over lines in the CSV file "f",
+    which is encoded in the given encoding.
+    """
+
+    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
+        f = UTF8Recoder(f, encoding)
+        self.reader = csv.reader(f, dialect=dialect, **kwds)
+
+    def next(self):
+        row = self.reader.next()
+        return [unicode(s, "utf-8") for s in row]
+
+    def __iter__(self):
+        return self
+
+class UnicodeWriter:
+    """
+    A CSV writer which will write rows to CSV file "f",
+    which is encoded in the given encoding.
+    """
+
+    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
+        # Redirect output to a queue
+        self.queue = cStringIO.StringIO()
+        self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
+        self.stream = f
+        self.encoder = codecs.getincrementalencoder(encoding)()
+
+    def writerow(self, row):
+        self.writer.writerow([s.decode("utf-8").encode("utf-8") for s in row])
+        # Fetch UTF-8 output from the queue ...
+        data = self.queue.getvalue()
+        data = data.decode("utf-8")
+        # ... and reencode it into the target encoding
+        data = self.encoder.encode(data)
+        # write to the target stream
+        self.stream.write(data)
+        # empty queue
+        self.queue.truncate(0)
+
+    def writerows(self, rows):
+        for row in rows:
+            self.writerow(row)
+
+def submiterator_stringify(something):
+  if type(something) is int or type(something) is float:
+    return str(something)
+  else:
+    return something.encode("utf-8")
 
 def main():
     parser = argparse.ArgumentParser(description='Interface with MTurk.')
@@ -141,7 +209,7 @@ def prepare(nameofexperimentfiles, output_dir=""):
     conditions = dict["conditions"]
     conditionlist = conditions.split(",")
     for x in conditionlist:
-        input.write(str(num) + " " + x + " \n")
+        input.write(submiterator_stringify(num) + " " + x + " \n")
         num = num + 1
     input.close()
 
@@ -157,10 +225,13 @@ def reformat(mturk_data_file, workers={}):
   def clean_text(text):
     return text
 
-  def write_2_by_2(data, filename, sep="\t"):
-    w = open(filename, "w")
-    w.write("\n".join(map(lambda x: sep.join(x), data)))
-    w.close()
+  def write_2_by_2(data, filename):
+    with open(filename, 'wb') as csvfile:
+      w = UnicodeWriter(csvfile)
+      w.writerows(data)
+      # w = open(filename, "w")
+      # w.write("\n".join(map(lambda x: sep.join(x), data)))
+      # w.close()
 
   # workers = json.loads(re.sub("'", '"', re.sub(" u'", " '", sys.argv[2])))
 
@@ -168,7 +239,7 @@ def reformat(mturk_data_file, workers={}):
     if workerid in workers:
       return workers[workerid]
     else:
-      id_number = str(len(workers))
+      id_number = submiterator_stringify(len(workers))
       workers[workerid] = id_number
       return id_number
 
@@ -177,7 +248,7 @@ def reformat(mturk_data_file, workers={}):
     with open(mturk_data_file, 'rb') as csvfile:
       header_labels = []
       header = True
-      mturk_reader = csv.reader(csvfile, delimiter='\t', quotechar='"')
+      mturk_reader = UnicodeReader(csvfile, delimiter='\t', quotechar='"', encoding=encoding)
       for row in mturk_reader:
         if header:
           header = False
@@ -209,7 +280,7 @@ def reformat(mturk_data_file, workers={}):
     with open(mturk_data_file, 'rb') as csvfile:
       header_labels = []
       header = True
-      mturk_reader = csv.reader(csvfile, delimiter='\t', quotechar='"')
+      mturk_reader = UnicodeReader(csvfile, delimiter='\t', quotechar='"', encoding="utf-8")
       for row in mturk_reader:
         if header:
           header = False
@@ -231,7 +302,7 @@ def reformat(mturk_data_file, workers={}):
                 for trial in trials:
                   for key in new_column_labels:
                     if key in trial.keys():
-                      trial_level_data[key].append(str(trial[key]))
+                      trial_level_data[key].append(submiterator_stringify(trial[key]))
                     else:
                       trial_level_data[key].append("NA")
               else:
@@ -241,7 +312,7 @@ def reformat(mturk_data_file, workers={}):
                   data = json.loads(elem)
                 for key in new_column_labels:
                   if key in data.keys():
-                    subject_level_data[key] = str(data[key])
+                    subject_level_data[key] = submiterator_stringify(data[key])
                   else:
                     subject_level_data[key] = "NA"
             elif label == "workerid":
@@ -256,7 +327,7 @@ def reformat(mturk_data_file, workers={}):
               elif label == "assignmentsubmittime":
                 if data_type == "subject_information":
                   dates_for_invoice.append(elem)
-              subject_level_data[label] = str(elem)
+              subject_level_data[label] = submiterator_stringify(elem)
           if len(trial_level_data.keys()) > 0:
             ntrials = len(trial_level_data[trial_level_data.keys()[0]])
           else:
@@ -280,7 +351,7 @@ def reformat(mturk_data_file, workers={}):
             for key in new_column_labels:
               output_row.append(subject_level_data[key])
             output_rows.append(output_row)
-    write_2_by_2(output_rows, output_data_file_label + "-" + data_type + ".tsv")
+    write_2_by_2(output_rows, output_data_file_label + "-" + data_type + ".csv")
     return [[clean_text(elem) for elem in row] for row in output_rows]
 
 
@@ -310,7 +381,7 @@ def reformat(mturk_data_file, workers={}):
         for trial in small_trials:
           big_row = trial + small_subject_information + small_system + small_mturk
           big_rows.append(big_row)
-    write_2_by_2(big_rows, output_data_file_label + ".tsv")
+    write_2_by_2(big_rows, output_data_file_label + ".csv")
 
   make_full_tsv()
 
@@ -318,11 +389,11 @@ def reformat(mturk_data_file, workers={}):
 
   rows = [["date", "workerid", "amount"]]
   for i in range(len(workerids_for_invoice)):
-    rows.append([dates_for_invoice[i], workerids_for_invoice[i], str(prices_for_invoice[i])])
-  rows.append(["", "total paid to workers:", "=SUM(c2:c" + str(len(workerids_for_invoice) + 1) + ")"])#str(sum(prices_for_invoice))])
-  rows.append(["", "10% paid to Amazon:", "=.1*c" + str(len(workerids_for_invoice) + 2)])#str(0.1*sum(prices_for_invoice))])
-  rows.append(["", "total:", "=SUM(c" + str(len(workerids_for_invoice) + 2) + ":c" + str(len(workerids_for_invoice) + 3)])# str(1.1*sum(prices_for_invoice))])
-  write_2_by_2(rows, output_data_file_label + "_invoice.csv", sep=",")
+    rows.append([dates_for_invoice[i], workerids_for_invoice[i], submiterator_stringify(prices_for_invoice[i])])
+  rows.append(["", "total paid to workers:", "=SUM(c2:c" + submiterator_stringify(len(workerids_for_invoice) + 1) + ")"])
+  rows.append(["", "10% paid to Amazon:", "=.1*c" + submiterator_stringify(len(workerids_for_invoice) + 2)])
+  rows.append(["", "total:", "=SUM(c" + submiterator_stringify(len(workerids_for_invoice) + 2) + ":c" + submiterator_stringify(len(workerids_for_invoice) + 3)])
+  write_2_by_2(rows, output_data_file_label + "_invoice.csv")
 
 def anonymize(original_data_filename):
     workers = {}
@@ -330,7 +401,7 @@ def anonymize(original_data_filename):
         if workerid in workers:
             return workers[workerid]
         else:
-            id_number = str(len(workers))
+            id_number = submiterator_stringify(len(workers))
             workers[workerid] = id_number
             return id_number
 
@@ -338,7 +409,7 @@ def anonymize(original_data_filename):
     new_rows = []
 
     with open(original_data_filename, "rb") as csvfile:
-        csvreader = csv.reader(csvfile, delimiter="\t")
+        csvreader = UnicodeReader(csvfile, delimiter="\t")
         is_header = True
         workerIndex = 0
         for row in csvreader:
