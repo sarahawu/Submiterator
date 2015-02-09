@@ -65,7 +65,7 @@ class UnicodeWriter:
             self.writerow(row)
 
 def submiterator_stringify(something):
-  if type(something) is int or type(something) is float:
+  if type(something) is int or type(something) is float or type(something) is list:
     return str(something)
   else:
     return something.encode("utf-8")
