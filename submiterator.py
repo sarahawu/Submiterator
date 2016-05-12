@@ -457,9 +457,9 @@ def anonymize(original_data_filename):
                 row[workerIndex] = symb(row[workerIndex])
             new_rows.append("\t".join(row))
 
-    w = open(new_data_filename, "w")
-    w.write("\n".join(new_rows))
-    w.close()
+    with open(new_data_filename, 'wb') as csvfile:
+          w = UnicodeWriter(csvfile)
+          w.writerows(new_rows)
 
     print workers
 
