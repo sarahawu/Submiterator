@@ -3,7 +3,12 @@
 import csv, codecs, cStringIO
 import os, json, re, argparse
 
+import sys
+csv.field_size_limit(sys.maxsize)
+
 encoding = "utf-8"
+
+import csv, codecs, cStringIO
 
 class UTF8Recoder:
     """
@@ -49,7 +54,7 @@ class UnicodeWriter:
         self.encoder = codecs.getincrementalencoder(encoding)()
 
     def writerow(self, row):
-        self.writer.writerow([s.decode("utf-8").encode("utf-8") for s in row])
+        self.writer.writerow([s.encode("utf-8") for s in row])
         # Fetch UTF-8 output from the queue ...
         data = self.queue.getvalue()
         data = data.decode("utf-8")
@@ -66,9 +71,17 @@ class UnicodeWriter:
 
 def submiterator_stringify(something):
   if type(something) is int or type(something) is float or type(something) is list:
-    return str(something)
+    return str(something).encode('utf-8')
   else:
     return something.encode("utf-8")
+
+def write_csv(data, filename, delimiter=','):
+    fieldnames = data[0].keys()
+    csvfile = open(filename, 'wb')
+    csvwriter = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=delimiter)
+    csvwriter.writeheader()
+    csvwriter.writerows(data)
+    csvfile.close()
 
 def main():
     parser = argparse.ArgumentParser(description='Interface with MTurk.')
@@ -81,25 +94,6 @@ def main():
         "experiment you want to work with. each experiment has a unique label. " +
         "this will be the beginning of the name of the config file (everything " +
         "before the dot). [label].config.")
-    # parser.add_argument("--live", dest='is_live', action='store_const',
-    #   const=True, default=False, help="interface with live site (defaults to sandbox)")
-    # parser.add_argument("--posthit", help="post a hit to mturk. requires label")
-    # parser.add_argument("--getresults", help="get results from mturk. requires label")
-    # parser.add_argument("--reformat")
-    # parser.add_argument("--preparefiles")
-    # parser.add_argument("--anonymize")
-    # parser.add_argument('integers', metavar='N', type=int, nargs='+',
-    #                    help='an integer for the accumulator')
-    # parser.add_argument('--sum', dest='accumulate', action='store_const',
-    #                    const=sum, default=max,
-    #                    help='sum the integers (default: find the max)')
-
-    # parser = argparse.ArgumentParser(description='Interface with MTurk.')
-    # parser.add_argument('integers', metavar='N', type=int, nargs='+',
-    #                    help='an integer for the accumulator')
-    # parser.add_argument('--sum', dest='accumulate', action='store_const',
-    #                    const=sum, default=max,
-    #                    help='sum the integers (default: find the max)')
 
     args = parser.parse_args()
     # print args.accumulate(args.integers)
@@ -215,6 +209,56 @@ def prepare(nameofexperimentfiles, output_dir=""):
         num = num + 1
     input.close()
 
+def posthit(label):
+    os.system(
+        """
+        HERE=`pwd`
+        cd $MTURK_CMD_HOME/bin
+
+        NAME_OF_EXPERIMENT_FILES=""" + label + """
+        label=$HERE/$NAME_OF_EXPERIMENT_FILES
+        ./loadHITs.sh -label $label -input $label.input -question $label.question -properties $label.properties -maxhits 1
+        """
+        )
+
+def getresults(label):
+    os.system("""
+        HERE=`pwd`
+        cd $MTURK_CMD_HOME/bin
+
+        NAME_OF_EXPERIMENT_FILES=""" + label + """
+        label=$HERE/$NAME_OF_EXPERIMENT_FILES
+        ./getResults.sh -successfile $label.success -outputfile $label.results
+        """)
+
+def anonymize(original_data_filename):
+    workers = {}
+    def symb(workerid):
+        if workerid in workers:
+            return workers[workerid]
+        else:
+            id_number = str(len(workers)).decode('utf-8')
+            workers[workerid] = id_number
+            return id_number
+
+    new_data_filename = original_data_filename.split(".results")[0] + "_anonymized.results"
+    new_rows = []
+
+    csvfile = open(original_data_filename, 'rb')
+    csvreader = csv.DictReader(csvfile, delimiter='\t')
+    for row in csvreader:
+        trialdata = json.loads(row['Answer.trials'])
+        trialstring = json.dumps(trialdata)
+        row['Answer.trials'] = trialstring
+        workerid = row['workerid']
+        row['workerid'] = symb(workerid)
+        new_rows.append(row)
+    csvfile.close()
+
+    write_csv(new_rows, new_data_filename, delimiter='\t')
+
+    print workers
+
 def make_invoice(output_file_label):
 
   mturk_data_file = output_file_label + ".results"
@@ -257,7 +301,7 @@ def make_invoice(output_file_label):
   for i in range(len(workerids_for_invoice)):
     rows.append([dates_for_invoice[i], workerids_for_invoice[i], submiterator_stringify(prices_for_invoice[i])])
   rows.append(["", "total paid to workers:", "=SUM(c2:c" + submiterator_stringify(len(workerids_for_invoice) + 1) + ")"])
-  rows.append(["", "10% paid to Amazon:", "=.1*c" + submiterator_stringify(len(workerids_for_invoice) + 2)])
+  rows.append(["", "40% paid to Amazon:", "=.4*c" + submiterator_stringify(len(workerids_for_invoice) + 2)])
   rows.append(["", "total:", "=SUM(c" + submiterator_stringify(len(workerids_for_invoice) + 2) + ":c" + submiterator_stringify(len(workerids_for_invoice) + 3)])
   write_2_by_2(rows, output_file_label + "_invoice.csv")
 
@@ -396,6 +440,7 @@ def reformat(mturk_data_file, workers={}):
             for key in new_column_labels:
               output_row.append(subject_level_data[key])
             output_rows.append(output_row)
+    
     write_2_by_2(output_rows, output_data_file_label + "-" + data_type + ".csv")
     return [[clean_text(elem) for elem in row] for row in output_rows]
 
@@ -431,59 +476,6 @@ def reformat(mturk_data_file, workers={}):
   make_full_tsv()
 
   print workers
-
-def anonymize(original_data_filename):
-    workers = {}
-    def symb(workerid):
-        if workerid in workers:
-            return workers[workerid]
-        else:
-            id_number = submiterator_stringify(len(workers))
-            workers[workerid] = id_number
-            return id_number
-
-    new_data_filename = original_data_filename.split(".results")[0] + "_anonymized.results"
-    new_rows = []
-
-    with open(original_data_filename, "rb") as csvfile:
-        csvreader = UnicodeReader(csvfile, delimiter="\t")
-        is_header = True
-        workerIndex = 0
-        for row in csvreader:
-            if is_header:
-                workerIndex = row.index("workerid")
-                is_header = False
-            else:
-                row[workerIndex] = symb(row[workerIndex])
-            new_rows.append("\t".join(row))
-
-    with open(new_data_filename, 'wb') as csvfile:
-          w = UnicodeWriter(csvfile)
-          w.writerows(new_rows)
-
-    print workers
-
-def posthit(label):
-    os.system(
-        """
-        HERE=`pwd`
-        cd $MTURK_CMD_HOME/bin
-
-        NAME_OF_EXPERIMENT_FILES=""" + label + """
-        label=$HERE/$NAME_OF_EXPERIMENT_FILES
-        ./loadHITs.sh -label $label -input $label.input -question $label.question -properties $label.properties -maxhits 1
-        """
-        )
-
-def getresults(label):
-    os.system("""
-        HERE=`pwd`
-        cd $MTURK_CMD_HOME/bin
-
-        NAME_OF_EXPERIMENT_FILES=""" + label + """
-        label=$HERE/$NAME_OF_EXPERIMENT_FILES
-        ./getResults.sh -successfile $label.success -outputfile $label.results
-        """)
 
 # submiterator --preparefiles label [label ...]
 
