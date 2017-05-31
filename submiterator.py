@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 
 import csv, codecs, cStringIO
 import os, json, re, argparse
@@ -182,7 +182,7 @@ def prepare(nameofexperimentfiles, output_dir=""):
                 else:
                     new_properties_file.write(line)
         new_properties_file.close()
-        print "Old mturk.properties file backed up at " + locationofCLT + "/bin/mturk.properties.backup" 
+        print "Old mturk.properties file backed up at " + locationofCLT + "/bin/mturk.properties.backup"
 
     # write the .question file, which tells MTurk where to find your external HIT.
     question = open(output_dir + nameofexperimentfiles + ".question", 'w')
@@ -217,7 +217,7 @@ def posthit(label):
 
         NAME_OF_EXPERIMENT_FILES=""" + label + """
         label=$HERE/$NAME_OF_EXPERIMENT_FILES
-        ./loadHITs.sh -label $label -input $label.input -question $label.question -properties $label.properties -maxhits 1
+        ./loadHITs.sh -label "$label" -input "$label.input" -question "$label.question" -properties "$label.properties" -maxhits 1
         """
         )
 
@@ -227,8 +227,8 @@ def getresults(label):
         cd $MTURK_CMD_HOME/bin
 
         NAME_OF_EXPERIMENT_FILES=""" + label + """
-        label=$HERE/$NAME_OF_EXPERIMENT_FILES
-        ./getResults.sh -successfile $label.success -outputfile $label.results
+        label="$HERE/$NAME_OF_EXPERIMENT_FILES"
+        ./getResults.sh -successfile "$label.success" -outputfile "$label.results"
         """)
 
 def anonymize(original_data_filename):
@@ -440,7 +440,7 @@ def reformat(mturk_data_file, workers={}):
             for key in new_column_labels:
               output_row.append(subject_level_data[key])
             output_rows.append(output_row)
-    
+
     write_2_by_2(output_rows, output_data_file_label + "-" + data_type + ".csv")
     return [[clean_text(elem) for elem in row] for row in output_rows]
 
