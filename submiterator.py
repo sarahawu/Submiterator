@@ -70,7 +70,9 @@ class UnicodeWriter:
             self.writerow(row)
 
 def submiterator_stringify(something):
-  if type(something) is int or type(something) is float or type(something) is list:
+  if something is None:
+    return "NA"
+  if type(something) is int or type(something) is float or type(something) is list or type(something) is bool:
     return str(something).encode('utf-8')
   else:
     return something.encode("utf-8")
@@ -196,6 +198,8 @@ def prepare(nameofexperimentfiles, output_dir=""):
         properties.write("\nqualification.1:00000000000000000071\nqualification.comparator.1:EqualTo\nqualification.locale.1:US\nqualification.private.1:false")
     if (dict["minPercentPreviousHITsApproved"] != "none"):
         properties.write("\nqualification.2:000000000000000000L0\nqualification.comparator.2:GreaterThanOrEqualTo\nqualification.value.2:" + dict["minPercentPreviousHITsApproved"] + "\nqualification.private.2:false")
+    if (dict["doesNotHaveQualification"] != "none"):
+        properties.write("\nqualification.3:" + dict["doesNotHaveQualification"] + "\nqualification.comparator.3:DoesNotExist\nqualification.private.3:true")
     properties.close()
 
     #write the .input file. "conditions::" in the file experiment-settings.txt can be followed by any number of condition names, separated by a comma.
