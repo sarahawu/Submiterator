@@ -18,7 +18,8 @@ Give this config file a unique label as its name: `[LABEL].config`.
     "assignmentduration":"1800",
     "hitlifetime":"2592000",
     "autoapprovaldelay":"60000",
-    "conditions":"cond"
+    "conditions":"cond",
+    "doesNotHaveQualification": "<ID_TO_MTURK_QUALIFICATION> or none"
     }
 
 Then run the following commands in the terminal:
