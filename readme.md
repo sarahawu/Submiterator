@@ -49,7 +49,7 @@ And then when you want to get the results:
 
     python supersubmiterator.py getresults [LABEL]
 
-This will create a long-form table of your data (several `[LABEL]-*.csv` files.)
+This will create a long-form table of your data (several `[LABEL]-*.csv` files).
 
 
 ##  How to make this even cooler
