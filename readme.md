@@ -4,7 +4,6 @@ To post the HIT, first setup the config file.
 Give this config file a unique label as its name: `[LABEL].config`.
 
     {
-    "rewriteProperties":"yes",
     "liveHIT":"no",
     "title":"a title to show to turkers",
     "description":"a description to show to turkers",
@@ -14,11 +13,11 @@ Give this config file a unique label as its name: `[LABEL].config`.
     "minPercentPreviousHITsApproved":"95",
     "frameheight":"650",
     "reward":"0.00",
-    "numberofassignments":"1",
+    "numberofassignments":"10",
+    "assignmentsperhit": "9",
     "assignmentduration":"1800",
     "hitlifetime":"2592000",
     "autoapprovaldelay":"60000",
-    "conditions":"cond",
     "doesNotHaveQualification": "<ID_TO_MTURK_QUALIFICATION> or none"
     }
 
