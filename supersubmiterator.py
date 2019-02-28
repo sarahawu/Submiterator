@@ -103,7 +103,7 @@ def get_results(experiment_label, live_hit=True):
   with open(hit_id_filename, "r") as hit_id_file:
     for hit_id in hit_id_file:
       hit_id, assignments = hit_id.strip().split()
-      worker_results = mturk.list_assignments_for_hit(HITId=hit_id)
+      worker_results = mturk.list_assignments_for_hit(HITId=hit_id, MaxResults=100)
       print("Completed assignments for HIT \"{}\": {}/{}".format(hit_id, worker_results['NumResults'], assignments))
       print("-" * 80)
       if worker_results['NumResults'] > 0:
