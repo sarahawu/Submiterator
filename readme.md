@@ -2,6 +2,8 @@
 
 A tool for managing external HITS on Amazon Mechanical Turk. This tool makes it easy to post external HITS and to download the data after participants completed the experiment. Supersubmiterator also supports automatic batching, i.e., splitting one HIT with a large number of assignments into several hits with fewer assignments per HIT. 
 
+The behavior is similar to the [original Submiterator script](https://github.com/erindb/Submiterator) by Dan Lassiter and Erin Bennett. However, this is a pure Python implementation which does not require the Mechanical Turk CLI tools (which are no longer supported).
+
 ## Setup
 
 _(**Note**: supersubmiterator is written in Python 3. If your default Python command is python2, make sure to run `pip3` instead of `pip` and change the first line of `supersubmiterator.py` to `#!/usr/bin/env python3`.)_
