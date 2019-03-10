@@ -74,46 +74,46 @@ The tool supports the following options:
 
     A list of keywords that is shown to MTurk workers.
     
-* "USOnly?": "yes" or "no"
+* USOnly?: "yes" or "no"
 
     If set to "yes", only MTurk workers with a US IP address can see and accept your HIT.
 
-* "minPercentPreviousHITsApproved": _integer_ or "none"
+* minPercentPreviousHITsApproved: _integer_ or "none"
 
     If set to an integer _x_ between 0 and 100, only participants with at least _x_% previous 
     HITs approved can see and accept your hit.
     
-* "frameheight": _integer_
+* frameheight: _integer_
 
    The height (in pixel) of the iframe in which your experiment is displayed. 
    Set this to at least the height of the largest trial in your experiment.
 
-* "reward": _decimal_
+* reward: _decimal_
 
    The reward (in USD) that MTurk workers get for completing your HIT.
 
-* "numberofassignments": _integer_
+* numberofassignments: _integer_
 
    The total number of assignments (i.e., the total number of participants) for your experiment.
    
-* "assignmentsperhit": _integer_ (optional)
+* assignmentsperhit: _integer_ (optional)
 
    The number of assignmets per HIT. If this is set to a lower number than _numberofassignments_, 
    the tool will automatically create multiple HITs with at most _assignmentsperhit_ assignments per HIT.
 
-* "assignmentduration": _integer_
+* assignmentduration: _integer_
 
    Maximum time (in seconds) for MTurk workers to complete your experiment.
    
-* "hitlifetime": _integer_
+* hitlifetime: _integer_
 
    Lifetime (in seconds) of your HIT. After this period expires, MTurk workers can no longer see and accept your HIT.
 
-* "autoapprovaldelay": _integer_
+* autoapprovaldelay: _integer_
 
    Time (in seconds) after which completed assigments are automatically approved.
    
-* "doesNotHaveQualification": _string_ (optional)
+* doesNotHaveQualification: _string_ (optional)
 
    If set to a qualification ID, only MTurk workers without this qualification can see and accept your HIT. 
    
