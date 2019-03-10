@@ -54,68 +54,24 @@ Give this config file a unique label as its name: `[LABEL].config`.
 
 The tool supports the following options:
 
-* liveHIT: "yes" or "no"
 
-    If set to "no", the HIT is posted to the sandbox (useful for debugging).
-
-* title: _string_
-
-    A title that is shown to MTurk workers.
-
-* description: _string_
-
-    A description that is shown to MTurk workers.
-
-* experimentURL: _string_
-
-    A public HTTPS URL where your experiment is located.
-
-* keywords: _string_
-
-    A list of keywords that is shown to MTurk workers.
-    
-* USOnly?: "yes" or "no"
-
-    If set to "yes", only MTurk workers with a US IP address can see and accept your HIT.
-
-* minPercentPreviousHITsApproved: _integer_ or "none"
-
-    If set to an integer _x_ between 0 and 100, only participants with at least _x_% previous 
-    HITs approved can see and accept your hit.
-    
-* frameheight: _integer_
-
-   The height (in pixel) of the iframe in which your experiment is displayed. 
-   Set this to at least the height of the largest trial in your experiment.
-
-* reward: _decimal_
-
-   The reward (in USD) that MTurk workers get for completing your HIT.
-
-* numberofassignments: _integer_
-
-   The total number of assignments (i.e., the total number of participants) for your experiment.
-   
-* assignmentsperhit: _integer_ (optional)
-
-   The number of assignmets per HIT. If this is set to a lower number than _numberofassignments_, 
-   the tool will automatically create multiple HITs with at most _assignmentsperhit_ assignments per HIT.
-
-* assignmentduration: _integer_
-
-   Maximum time (in seconds) for MTurk workers to complete your experiment.
-   
-* hitlifetime: _integer_
-
-   Lifetime (in seconds) of your HIT. After this period expires, MTurk workers can no longer see and accept your HIT.
-
-* autoapprovaldelay: _integer_
-
-   Time (in seconds) after which completed assigments are automatically approved.
-   
-* doesNotHaveQualification: _string_ (optional)
-
-   If set to a qualification ID, only MTurk workers without this qualification can see and accept your HIT. 
+| Option | Value | Description | 
+| --- | --- | --- |
+| liveHIT | "yes" or "no" | If set to "no", the HIT is posted to the sandbox (useful for debugging). |
+| title |  _string_ |  A title that is shown to MTurk workers. |
+| description | _string_ | A description that is shown to MTurk workers. |
+| experimentURL | _string_ |A public **HTTPS** URL where your experiment is located. |
+| keywords | _string_ | A list of keywords that is shown to MTurk workers. |
+| USOnly? |  "yes" or "no" | If set to "yes", only MTurk workers with a US IP address can see and accept your HIT.|
+| minPercentPreviousHITsApproved | _integer_ or "none" |If set to an integer _x_ between 0 and 100, only participants with at least _x_% previous HITs approved can see and accept your hit. |
+| frameheight | _integer_ | The height (in pixel) of the iframe in which your experiment is displayed. Set this to at least the height of the largest trial in your experiment. |
+|reward | _float_ | The reward (in USD) that MTurk workers get for completing your HIT. |
+| numberofassignments | _integer_ | The total number of assignments (i.e., the total number of participants) for your experiment. |
+| assignmentsperhit (optional) | _integer_ | The number of assignmets per HIT. If this is set to a lower number than _numberofassignments_, the tool will automatically create multiple HITs with at most _assignmentsperhit_ assignments per HIT.|
+| assignmentduration | _integer_ | Maximum time (in seconds) for MTurk workers to complete your experiment. |
+| hitlifetime | _integer_ | Lifetime (in seconds) of your HIT. After this period expires, MTurk workers can no longer see and accept your HIT.|
+| autoapprovaldelay | _integer_ | Time (in seconds) after which completed assigments are automatically approved. |
+| doesNotHaveQualification (optional) | _string_ | If set to a qualification ID, only MTurk workers without this qualification can see and accept your HIT. |
    
    
 Once you have setup the connfig file, run the following command in the terminal:
