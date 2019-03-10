@@ -9,7 +9,7 @@ The behavior is similar to the [original Submiterator tool](https://github.com/e
 _(**Note**: supersubmiterator is written in Python 3. If your default Python command is python2, make sure to run `pip3` instead of `pip` and change the first line of `supersubmiterator.py` to `#!/usr/bin/env python3`.)_
 
 
-1. If you do not already have a MTurk requester account, follow [these instructions](https://docs.aws.amazon.com/AWSMechTurk/latest/AWSMechanicalTurkGettingStartedGuide/SetUp.html) to sign up as a requester and create an access key/secret pair on Amazon Mechanical Turk.
+1. If you do not already have an MTurk requester account, follow [these instructions](https://docs.aws.amazon.com/AWSMechTurk/latest/AWSMechanicalTurkGettingStartedGuide/SetUp.html) to sign up as a requester and create an access key/secret pair on Amazon Mechanical Turk.
 
 
 2. Install the `boto3` and the `xmltodict` packages:
