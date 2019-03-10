@@ -4,7 +4,7 @@ A tool for managing external HITS on Amazon Mechanical Turk. This tool makes it 
 
 ## Setup
 
-_(**Note**: supersubmiterator is written in Python 3. If your default Python command is python2, make sure to run `pip3` instead of `pip` and change the first line of `supersubmiterator.py` to `#!/usr/bin/env python`.)_
+_(**Note**: supersubmiterator is written in Python 3. If your default Python command is python2, make sure to run `pip3` instead of `pip` and change the first line of `supersubmiterator.py` to `#!/usr/bin/env python3`.)_
 
 
 1. If you do not already have a MTurk requester account, follow [these instructions](https://docs.aws.amazon.com/AWSMechTurk/latest/AWSMechanicalTurkGettingStartedGuide/SetUp.html) to sign up as a requester and create an access key/secret pair on Amazon Mechanical Turk.
