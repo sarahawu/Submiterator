@@ -76,7 +76,7 @@ The tool supports the following options:
 | doesNotHaveQualification (optional) | _string_ | If set to a qualification ID, only MTurk workers without this qualification can see and accept your HIT. |
    
    
-Once you have setup the connfig file, run the following command in the terminal:
+Once you have setup the config file, run the following command in the terminal:
 
     python supersubmiterator.py posthit [LABEL]
 
