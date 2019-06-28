@@ -233,6 +233,16 @@ def parse_config(experiment_label, output_dir=""):
       "Comparator": "DoesNotExist",
       "ActionsGuarded": "DiscoverPreviewAndAccept"
     })
+  
+  if "doesHaveQualification" in config and config["doesHaveQualification"] != "none":
+    qualification_ids = (config["doesHaveQualification"] 
+                         if "," not in config["doesHaveQualification"] 
+                         else config["doesHaveQualification"].split(","))
+    hit_options["QualificationRequirements"].append({
+      "QualificationTypeId": qualification_ids,
+      "Comparator": "Exists",
+      "ActionsGuarded": "DiscoverPreviewAndAccept"
+    })
 
   max_assignments =  int(config["numberofassignments"])
   if "assignmentsperhit" in config:
