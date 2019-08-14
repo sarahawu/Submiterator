@@ -227,7 +227,7 @@ def parse_config(experiment_label, output_dir=""):
       "ActionsGuarded": "DiscoverPreviewAndAccept"
     })
   
-  if config["minNumPreviousHITsApproved"] != "none":
+  if "minNumPreviousHITsApproved" in config and config["minNumPreviousHITsApproved"] != "none":
     hit_options["QualificationRequirements"].append({
       "QualificationTypeId": "00000000000000000040",
       "Comparator": "GreaterThanOrEqualTo",
