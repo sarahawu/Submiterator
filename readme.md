@@ -44,6 +44,7 @@ Give this config file a unique label as its name: `[LABEL].config`.
     "keywords":"language research stanford fun cognitive science university explanations",
     "USonly?":"yes",
     "minPercentPreviousHITsApproved":"95",
+    "minNumPreviousHITsApproved":"95",
     "frameheight":"650",
     "reward":"0.00",
     "numberofassignments":"10",
@@ -66,6 +67,7 @@ The tool supports the following options:
 | keywords | _string_ | A list of keywords that is shown to MTurk workers. |
 | USOnly? |  "yes" or "no" | If set to "yes", only MTurk workers with a US IP address can see and accept your HIT.|
 | minPercentPreviousHITsApproved | _integer_ or "none" |If set to an integer _x_ between 0 and 100, only participants with at least _x_% previous HITs approved can see and accept your hit. |
+| minNumPreviousHITsApproved | _integer_ or "none" |If set to an integer _x_ , only participants with at least _x_ previous HITs approved can see and accept your hit. |
 | frameheight | _integer_ | The height (in pixel) of the iframe in which your experiment is displayed. Set this to at least the height of the largest trial in your experiment. |
 |reward | _float_ | The reward (in USD) that MTurk workers get for completing your HIT. |
 | numberofassignments | _integer_ | The total number of assignments (i.e., the total number of participants) for your experiment. |
