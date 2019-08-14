@@ -44,7 +44,7 @@ Give this config file a unique label as its name: `[LABEL].config`.
     "keywords":"language research stanford fun cognitive science university explanations",
     "USonly?":"yes",
     "minPercentPreviousHITsApproved":"95",
-    "minNumPreviousHITsApproved":"95",
+    "minNumPreviousHITsApproved":"1000",
     "frameheight":"650",
     "reward":"0.00",
     "numberofassignments":"10",
