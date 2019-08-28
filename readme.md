@@ -52,6 +52,7 @@ Give this config file a unique label as its name: `[LABEL].config`.
     "assignmentduration":"1800",
     "hitlifetime":"2592000",
     "autoapprovaldelay":"60000",
+    "doesHaveQualification":"<ID_TO_MTURK_QUALIFICATION> or none",
     "doesNotHaveQualification": "<ID_TO_MTURK_QUALIFICATION> or none"
     }
 
@@ -75,8 +76,9 @@ The tool supports the following options:
 | assignmentduration | _integer_ | Maximum time (in seconds) for MTurk workers to complete your experiment. |
 | hitlifetime | _integer_ | Lifetime (in seconds) of your HIT. After this period expires, MTurk workers can no longer see and accept your HIT.|
 | autoapprovaldelay | _integer_ | Time (in seconds) after which completed assigments are automatically approved. |
+| doesHaveQualification (optional) | _string_ | If set to a qualification ID, only MTurk workers with this qualification can see and accept your HIT.|
 | doesNotHaveQualification (optional) | _string_ | If set to a qualification ID, only MTurk workers without this qualification can see and accept your HIT. |
-   
+ 
    
 Once you have setup the config file, run the following command in the terminal:
 
@@ -88,6 +90,9 @@ And then when you want to get the results:
 
 This will create a long-form table of your data (several `[LABEL]-*.csv` files).
 
+If you want to assign workers to a qualification (workers should be in `[LABEL]-workerids.csv`):
+
+	python supersubmiterator.py assignqualification -qualification_id <ID_TO_MTURK_QUALIFICATION> [LABEL]
 
 ##  How to make this even cooler
 
