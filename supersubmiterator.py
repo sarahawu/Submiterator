@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import json, argparse, os, csv
 import boto3
@@ -22,7 +22,6 @@ def main():
     parser.add_argument("-qualification_id", metavar="qualificationid", type=str,
       default = None)
 
-
     args = parser.parse_args()
 
     subcommand = args.subcommand
@@ -32,7 +31,6 @@ def main():
         if subcommand == "posthit":
             live_hit, hit_configs = parse_config(label)
             post_hit(label, hit_configs, live_hit)
-        #   posthit(label)
         elif subcommand == "getresults":
             live_hit, _ = parse_config(label)
             results, results_types = get_results(label, live_hit)
@@ -41,8 +39,6 @@ def main():
         elif subcommand == "assignqualification":
             live_hit, _ = parse_config(label)
             assign_qualification(label, live_hit, args.qualification_id)
- 
-
              
 def mturk_client(live_hit=True):
   if live_hit:
@@ -64,8 +60,7 @@ def preview_url(hit_id, live_hit=True):
   if live_hit:
     return "https://worker.mturk.com/mturk/preview?groupId=" + hit_id
   else:
-    return "https://workersandbox.mturk.com/mturk/preview?groupId=" + hit_id
-    
+    return "https://workersandbox.mturk.com/mturk/preview?groupId=" + hit_id    
 
 def post_hit(experiment_label, hit_configs, live_hit=True):
   hit_id_filename = experiment_label + ".hits"
@@ -253,6 +248,16 @@ def parse_config(experiment_label, output_dir=""):
       "Comparator": "GreaterThanOrEqualTo",
       "IntegerValues": [
         int(config["minPercentPreviousHITsApproved"])
+      ],
+      "ActionsGuarded": "DiscoverPreviewAndAccept"
+    })
+  
+  if "minNumPreviousHITsApproved" in config and config["minNumPreviousHITsApproved"] != "none":
+    hit_options["QualificationRequirements"].append({
+      "QualificationTypeId": "00000000000000000040",
+      "Comparator": "GreaterThanOrEqualTo",
+      "IntegerValues": [
+        int(config["minNumPreviousHITsApproved"])
       ],
       "ActionsGuarded": "DiscoverPreviewAndAccept"
     })
