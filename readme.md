@@ -98,10 +98,10 @@ If you want to assign workers to a qualification (workers should be in `[LABEL]-
 
 N.B. this will only work on unix.
 
-If you want, you can make `submiterator` a system-wide command, so you can just type (for example):
+If you want, you can make `supersubmiterator` a system-wide command, so you can just type (for example):
 
-    supersubmiterator posthit example
-    supersubmiterator getresults example
+    supersubmiterator posthit [LABEL]
+    supersubmiterator getresults [LABEL]
 
 To do this, save the Submiterator repo somewhere where it won't move, copy-paste and run the following command:
 
