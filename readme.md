@@ -119,3 +119,28 @@ Then open up or create the file `.bash_profile` or `.bashrc` in your home direct
 	PATH=$PATH:~/bin
 
 Then once you open up a new terminal, you should be able to use the `supersubmiterator` command as above.
+
+## Assigning qualifications
+
+You can also use supersubmiterator to assign qualifications to workers:
+
+```supersubmiterator assignqualification -qualification_id [MTURK_QUALIFICATION_ID] [LABEL]```
+	
+## Bonus payments
+
+To pay workers a bonus, create a file `[LABEL]-bonus.csv` in the same directory as the `[LABEL].config` file, using the following format:
+
+```
+workerid,assignmentid,bonus
+XYZAUMQ231,ABCCAHTNV34VFG76320,3.00
+XYZPXP2345,DEFCAY5L23TKNC75GTVIP,0.50
+```
+
+Then run
+
+```supersubmiterator paybonus [LABEL]```
+       
+This will pay the worker with the ID `XYZAUMQ231` a bonus of $3.00, and the worker with the ID `XYZPXP2345` a bonus of $0.50.
+
+
+
