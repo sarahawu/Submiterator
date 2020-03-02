@@ -147,17 +147,27 @@ def get_results(experiment_label, live_hit=True):
   return results, result_types   
  
 def anonymize(results, results_types):
+  filtered_results = {}
+  for field in results_types:
+    if results_types[field] != "value":
+      filtered_results[field] = []
+      for row in results[field]:
+        if not isinstance(row, dict):
+          print("WARNING: Removed invalid data point.")
+          continue
+        filtered_results[field].append(row)
+  
   anon_workerids = {}
   c = 0
   for field in results_types:
     if results_types[field] != "value":
-      for row in results[field]:
+      for row in filtered_results[field]:
         if row["workerid"] not in anon_workerids:
           anon_workerids[row["workerid"]] = c
           c += 1
         row["workerid"] = anon_workerids[row["workerid"]]
-   
-  return results, anon_workerids
+  
+  return filtered_results, anon_workerids
  
 def write_results(label, results, results_types):
   results, anon_workerids = anonymize(results, results_types)
@@ -199,7 +209,7 @@ def assign_qualification(label, live_hit, qualificationid):
       QualificationTypeId=qualificationid,
       WorkerId=workerid,
       IntegerValue=100,
-      SendNotification=True
+      SendNotification=False
     )
     print(response)
 
