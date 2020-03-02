@@ -11,7 +11,7 @@ MTURK_SECRET = os.environ["MTURK_SECRET"]
 
 def main():
     parser = argparse.ArgumentParser(description='Interface with MTurk.')
-    parser.add_argument("subcommand", choices=['posthit', 'getresults', 'assignqualification'],
+    parser.add_argument("subcommand", choices=['posthit', 'getresults', 'assignqualification', 'paybonus'],
         type=str, action="store",
         help="choose a specific subcommand.")
     parser.add_argument("nameofexperimentfiles", metavar="label", type=str, nargs="+",
@@ -39,6 +39,10 @@ def main():
         elif subcommand == "assignqualification":
             live_hit, _ = parse_config(label)
             assign_qualification(label, live_hit, args.qualification_id)
+        elif subcommand == "paybonus":
+            live_hit, _ = parse_config(label)
+            pay_bonus(label, live_hit)
+            
              
 def mturk_client(live_hit=True):
   if live_hit:
@@ -100,19 +104,20 @@ def get_results(experiment_label, live_hit=True):
   mturk = mturk_client(live_hit = live_hit)
   print("Retrieving results...")
   print("-" * 80)
-  results = {"trials": []}
-  result_types = {"trials": "list"}
+  results = {"trials": [], "assignments": []}
+  result_types = {"trials": "list", "assignments": "list"}
   with open(hit_id_filename, "r") as hit_id_file:
     for hit_id in hit_id_file:
       hit_id, assignments = hit_id.strip().split()
       worker_results = mturk.list_assignments_for_hit(HITId=hit_id, MaxResults=100)
       print("Completed assignments for HIT \"{}\": {}/{}".format(hit_id, worker_results['NumResults'], assignments))
-      print("-" * 80)
+      print("-" * 80)      
       if worker_results['NumResults'] > 0:
         for a in worker_results['Assignments']:
           xml_doc = xmltodict.parse(a['Answer'])
           additional_trial_cols = {}
           worker_id = a["WorkerId"]
+          assignment_id = a["AssignmentId"]
           for answer_field in xml_doc['QuestionFormAnswers']['Answer']:
             field_name = answer_field['QuestionIdentifier']
             if field_name == "trials":
@@ -138,6 +143,8 @@ def get_results(experiment_label, live_hit=True):
               elif result_types[field_name] == "value":
                 additional_trial_cols["Answer." + field_name] = answer_obj
 
+          d = add_workerid(worker_id, "assignments", {"assignmentid": assignment_id})
+          results["assignments"].append(d)
           trials = add_workerid(worker_id, "trials", trials)
           for t in trials:
              for col in additional_trial_cols:
@@ -212,6 +219,52 @@ def assign_qualification(label, live_hit, qualificationid):
       SendNotification=False
     )
     print(response)
+
+def pay_bonus(label, live_hit):
+  
+  mturk = mturk_client(live_hit)
+  bonus_total = 0
+  n_boni = 0
+  new_rows = []
+  with open(label + '-bonus.csv') as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+      if float(row["bonus"]) > 0:
+        response = mturk.send_bonus(
+            WorkerId=row["workerid"],
+            BonusAmount=row["bonus"],
+            AssignmentId=row["assignmentid"],
+            Reason='Participation in experiment.'
+        )
+        if ("ResponseMetadata" not in response or 
+            "HTTPStatusCode" not in response["ResponseMetadata"] or
+            response["ResponseMetadata"]["HTTPStatusCode"] != 200
+           ):
+          print("ERROR: Bonus payment to worker {} failed!", row["workerid"])
+          new_rows.append(row)
+          continue
+        n_boni += 1
+
+      if "bonus_paid" not in row:
+        row["bonus_paid"] = 0
+      row["bonus_paid"] = float(row["bonus_paid"]) + float(row["bonus"])
+      bonus_total = bonus_total + float(row["bonus"])
+      row["bonus"] = 0
+      new_rows.append(row)
+  
+  if len(new_rows) < 1:
+    return
+  
+  with open(label + "-bonus.csv", 'w') as f:
+    writer = csv.DictWriter(f, new_rows[0].keys())
+    writer.writeheader()
+    writer.writerows(new_rows)
+  
+    print("-" * 80)
+    print("Paid boni to {} workers, totalling ${}".format(n_boni, bonus_total))
+    print("-" * 80)
+    
+
 
 def parse_config(experiment_label, output_dir=""):
   config_filename = experiment_label + ".config"
