@@ -125,7 +125,9 @@ Then once you open up a new terminal, you should be able to use the `supersubmit
 You can also use supersubmiterator to assign qualifications to workers:
 
 ```supersubmiterator assignqualification -qualification_id [MTURK_QUALIFICATION_ID] [LABEL]```
-	
+
+This will assign the qualifiaction `[MTURK_QUALIFICATION_ID]` to all workers in `[LABEL]-workerids.csv`.
+
 ## Bonus payments
 
 To pay workers a bonus, create a file `[LABEL]-bonus.csv` in the same directory as the `[LABEL].config` file, using the following format:
