@@ -6,8 +6,15 @@ import xmltodict
 
 
 MTURK_SANDBOX_URL = "https://mturk-requester-sandbox.us-east-1.amazonaws.com"
-MTURK_ACCESS_KEY = os.environ["MTURK_ACCESS_KEY"]
-MTURK_SECRET = os.environ["MTURK_SECRET"]
+try:
+    MTURK_ACCESS_KEY = os.environ["MTURK_ACCESS_KEY"]
+except:
+    MTURK_ACCESS_KEY = None
+
+try:
+    MTURK_SECRET = os.environ["MTURK_SECRET"]
+except:
+    MTURK_SECRET = None
 
 def main():
     parser = argparse.ArgumentParser(description='Interface with MTurk.')
