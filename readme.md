@@ -14,21 +14,35 @@ _(**Note**: supersubmiterator is written in Python 3. If your default Python com
 
 2. Install the `boto3` and the `xmltodict` packages:
 
-```
-pip install boto3
-pip install xmltodict
-```
+    ```
+    pip install boto3
+    pip install xmltodict
+    ```
 
-3. In your Bash profile (e.g., `~/.bash_profile` on most Macs), add the following two 
-environment variables with your MTurk access key and MTurk secret:
+3. Install your MTurk credentials (access key and secret), following the [boto3
+   directions](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html#configuration).
+   There are multiple ways to set these up, but the two easiest are:
 
-```
-export MTURK_ACCESS_KEY=<YOUR MTURK ACCESS KEY>
-export MTURK_SECRET=<YOUR MTURK SECRET>
-```
+    2. Put them in a file called `~/.aws/credentials`, formatted like
+       
+            ```
+            [default]
+            aws_access_key_id = YOUR_ACCESS_KEY
+            aws_secret_access_key = YOUR_SECRET_KEY
+            ```
 
-Then once you open up a new terminal, you should be able to use the tool.
+    1. Add environment variables in your Bash (or other shell) profile (e.g.,
+       `~/.bash_profile` on most Macs).  Add the following lines:
 
+            ```
+            export MTURK_ACCESS_KEY=<YOUR MTURK ACCESS KEY>
+            export MTURK_SECRET=<YOUR MTURK SECRET>
+            ```
+
+    Supersubmiterator will use the environment variables if they are available
+    by default.  Otherwise, it will fall back to `boto3` to find the
+    credentials.  For details on how this works, see the [`boto3`
+    documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#guide-configuration) 
 
 ## How to use supersubmiterator mturk tools
 
