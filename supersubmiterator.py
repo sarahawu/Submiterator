@@ -3,7 +3,7 @@
 import json, argparse, os, csv
 import boto3
 import xmltodict
-
+from datetime import datetime
 
 MTURK_SANDBOX_URL = "https://mturk-requester-sandbox.us-east-1.amazonaws.com"
 try:
@@ -15,20 +15,21 @@ try:
     MTURK_SECRET = os.environ["MTURK_SECRET"]
 except:
     MTURK_SECRET = None
-
+    
 def main():
     parser = argparse.ArgumentParser(description='Interface with MTurk.')
-    parser.add_argument("subcommand", choices=['posthit', 'getresults', 'assignqualification', 'paybonus'],
+    parser.add_argument("subcommand", choices=['posthit', 'deletehit', 'approveall    ', 'listall', 'getresults', 'assignqualification', 'paybonus'],
         type=str, action="store",
         help="choose a specific subcommand.")
-    parser.add_argument("nameofexperimentfiles", metavar="label", type=str, nargs="+",
+    parser.add_argument("nameofexperimentfiles", metavar="label", type=str, nargs=    "+",
         help="you must have at least one label that corresponds to the " +
         "experiment you want to work with. each experiment has a unique label. " +
         "this will be the beginning of the name of the config file (everything " +
         "before the dot). [label].config.")
-    parser.add_argument("-qualification_id", metavar="qualificationid", type=str,
+    parser.add_argument("--qualification-id", metavar="qualificationid", type=str,
       default = None)
-
+    parser.add_argument("--hit-id", type=str, default=None)
+    
     args = parser.parse_args()
 
     subcommand = args.subcommand
@@ -38,6 +39,15 @@ def main():
         if subcommand == "posthit":
             live_hit, hit_configs = parse_config(label)
             post_hit(label, hit_configs, live_hit)
+        elif subcommand == "deletehit":
+            live_hit, _ = parse_config(label)
+            delete_hit(label, live_hit, args.hit_id)
+        elif subcommand == "approveall":
+            live_hit, _ = parse_config(label)
+            approve_all_assignments(label, live_hit, args.hit_id)
+        elif subcommand == 'listall':
+            live_hit, _ = parse_config(label)
+            list_all_hits(live_hit)
         elif subcommand == "getresults":
             live_hit, _ = parse_config(label)
             results, results_types = get_results(label, live_hit)
@@ -75,7 +85,6 @@ def preview_url(hit_id, live_hit=True):
 
 def post_hit(experiment_label, hit_configs, live_hit=True):
   hit_id_filename = experiment_label + ".hits"
-  
   mturk = mturk_client(live_hit = live_hit)
   with open(hit_id_filename, "a") as hit_id_file:
     print("-" * 80)
@@ -85,6 +94,63 @@ def post_hit(experiment_label, hit_configs, live_hit=True):
       print("Preview: {}".format(preview_url(new_hit['HIT']['HITGroupId'], live_hit=live_hit)))
       print("-" * 80)
       print(new_hit['HIT']['HITId'], new_hit['HIT']["MaxAssignments"], file=hit_id_file)
+
+def delete_hit(experiment_label, live_hit, hit_id):
+    hit_id_filename = experiment_label + ".hits"
+    mturk = mturk_client(live_hit = live_hit)
+    print("-" * 80)
+    status = mturk.get_hit(HITId=hit_id)['HIT']['HITStatus']
+    if status == "Assignable":
+        response = mturk.update_expiration_for_hit(
+            HITId = hit_id,
+            ExpireAt = datetime.now()
+        )
+    try:
+        mturk.delete_hit(HITId=hit_id)
+    except:
+        print('Could not delete hit \"{}\"'.format(hit_id))
+    else:
+        print('Deleted hit \"{}\"'.format(hit_id))
+        with open(hit_id_filename, 'r') as hit_id_file:
+            lines = hit_id_file.readlines()
+        with open(hit_id_filename, 'w') as hit_id_file:
+            for line in lines:
+                if not line.strip('\n').startswith(hit_id):
+                    hit_id_file.write(line)
+    finally:
+        print("-" * 80)
+
+def approve_all_assignments(experiment_label, live_hit, hit_id):
+    hit_id_filename = experiment_label + ".hits"
+    mturk = mturk_client(live_hit = live_hit)
+    print("-" * 80)
+    worker_results = mturk.list_assignments_for_hit(
+        HITId = hit_id,
+        AssignmentStatuses=['Submitted']
+    )
+    print('Found {} pending assignments for hit \"{}\"'.format(len(worker_results[    'Assignments']), hit_id))
+    for a in worker_results['Assignments']:
+        try:
+            response = mturk.approve_assignment(
+                AssignmentId = a['AssignmentId']
+            )
+        except:
+            print('  Could not approve assignment "\{}\"'.format(a['AssignmentId']    ))
+        else:
+            print('  Approved assignment "\{}\"'.format(a['AssignmentId']))
+    print("-" * 80)
+
+def list_all_hits(live_hit):
+    mturk = mturk_client(live_hit = live_hit)
+    hit_results = mturk.list_hits()
+    print("-" * 80)
+    for i, hit in enumerate(hit_results['HITs']):
+        if i != 0:
+            print('')
+        print('\"{}\": {}/{}\nTitle: \"{}\"\nPosted: {}'.format(hit['HITId'],
+            hit['NumberOfAssignmentsCompleted'], hit['MaxAssignments'],
+            hit['Title'], hit['CreationTime']))
+    print("-" * 80)
 
 def parse_answer(json_str):
   try:

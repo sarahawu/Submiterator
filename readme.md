@@ -108,6 +108,19 @@ If you want to assign workers to a qualification (workers should be in `[LABEL]-
 
 	python supersubmiterator.py assignqualification -qualification_id <ID_TO_MTURK_QUALIFICATION> [LABEL]
 
+If you would like to delete a specific hit, run the following with the hit ID in place of `[HITID]`:
+    
+    python supersubmiterator.py deletehit [LABEL] --hit-id [HITID]
+
+To approve all pending assignments for a specific hit, run the following:
+
+    python supersubmiterator.py approveall [LABEL] --hit-id [HITID]
+
+To list all of your current active hits, including those not in your config file, run the following:
+
+    python supersubmiterator.py listall [LABEL]
+
+
 ##  How to make this even cooler
 
 N.B. this will only work on unix.
